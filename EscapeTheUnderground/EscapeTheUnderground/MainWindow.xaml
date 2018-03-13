@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EscapeTheUnderground"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="600" Width="1280">
+    <Canvas x:Name="LayoutRoot">
+        <Rectangle x:Name="Player" Fill="#FF0D0DE0" Height="100" Canvas.Left="38" Stroke="Black" Canvas.Top="415" Width="50"/>
+        <Label x:Name="Ypos" Content="Label" Canvas.Left="1097" Canvas.Top="10"/>
+        <Label x:Name="Xpos" Content="Label" Canvas.Left="1192" Canvas.Top="17"/>
+        <Rectangle x:Name="colBlock" Fill="#FFE00D0D" Height="100" Canvas.Left="586" Stroke="Black" Canvas.Top="400" Width="441"/>
+        <Label x:Name="blockPos" Content="Label" Canvas.Left="148" Canvas.Top="25"/>
+    </Canvas>
 </Window>
