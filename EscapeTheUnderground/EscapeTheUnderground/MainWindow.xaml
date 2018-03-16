@@ -1,4 +1,4 @@
-﻿<Window x:Class="EscapeTheUnderground.MainWindow"
+﻿d<Window x:Class="EscapeTheUnderground.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,10 +7,15 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1280">
     <Canvas x:Name="LayoutRoot">
-        <Rectangle x:Name="Player" Fill="#FF0D0DE0" Height="100" Canvas.Left="38" Stroke="Black" Canvas.Top="415" Width="50"/>
+        <Image x:Name="Background" Panel.ZIndex="-2" Height="{Binding Path=ActualHeight, ElementName=LayoutRoot}" Stretch="Uniform" Width="{Binding Path=ActualWidth, ElementName=LayoutRoot}"/>
+        <Image Tag="projectile" x:Name="Player" Height="100" Width="135" Canvas.Left="79" Canvas.Top="202"></Image>
         <Label x:Name="Ypos" Content="Label" Canvas.Left="1097" Canvas.Top="10"/>
         <Label x:Name="Xpos" Content="Label" Canvas.Left="1192" Canvas.Top="17"/>
-        <Rectangle x:Name="colBlock" Fill="#FFE00D0D" Height="100" Canvas.Left="586" Stroke="Black" Canvas.Top="400" Width="441"/>
-        <Label x:Name="blockPos" Content="Label" Canvas.Left="148" Canvas.Top="25"/>
+        <Rectangle x:Name="colBlock" Fill="#FFE00D0D" Height="100" Canvas.Left="-578" Stroke="Black" Canvas.Top="227" Width="441"/>
+        <Label Tag="projectile" x:Name="blockPos" Content="Skóre: 0" Canvas.Left="10" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
+        <Label x:Name="ammo_label" Content="Náboje: 20" Canvas.Left="115" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
+        <Label x:Name="HP" Content="HP: " Canvas.Left="234" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
+        <ProgressBar x:Name="health_bar" Height="25" Canvas.Left="295" Canvas.Top="11" Width="133"/>
+        <Image x:Name="BULLLLLLLLLLLLLLLLLLLET" Tag="projectile"></Image>
     </Canvas>
 </Window>
