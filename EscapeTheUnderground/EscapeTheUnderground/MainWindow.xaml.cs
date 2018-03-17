@@ -23,27 +23,36 @@ namespace EscapeTheUnderground
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Image laser;
+        private Image enemyAI;
+        private BitmapImage src;
+        private DispatcherTimer laserTimer;
+        double newPos = 0;
+
         bool right;
         bool left;
         bool jump;
         int MomentumUnit = 23;
         int Momentum;
         string currentImage;
-        //
         double player_health = 100;
         string direction = "right";
-        int player_ammo = 20;
+        string fixedDirection;
+        int player_ammo = 50;
         int player_score = 0;
+        int enemyCount;
         bool shootable = true;
-
-        //
+        bool hittable = true;
+        bool clearable = false;
         double x = 0;
         double y = 0;
         public MainWindow()
         {
             InitializeComponent();
-            ChangePlayer("still");
+            ChangePlayer("still", Player);
 
+            laser = new Image();
+            
             DispatcherTimer timer = new DispatcherTimer();
             timer.Tick += new EventHandler(MovePlayer);
             timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
@@ -57,10 +66,35 @@ namespace EscapeTheUnderground
             image.EndInit();
             WpfAnimatedGif.ImageBehavior.SetAnimatedSource(Background, image);
 
-
-            //delete later
-            GameControl();
-
+            //load laser
+            
+            src = new BitmapImage();
+            src.BeginInit();
+            src.UriSource = new Uri(pathToFiles + @"\Assets\Misc\bullet_friendly.png", UriKind.RelativeOrAbsolute);
+            src.CacheOption = BitmapCacheOption.OnLoad;
+            src.EndInit();
+            // Enemy Timer
+            DispatcherTimer Enemytimer = new DispatcherTimer();
+            Enemytimer.Tick += new EventHandler(enemyCycle);
+            Enemytimer.Interval = new TimeSpan(0,0,1);
+            Enemytimer.Start();
+        }
+        private int difficultyLevel()
+        {
+            int spawnProbability = 0;
+            if(player_score < 5)
+            {
+                spawnProbability = 10;
+            }
+            else if(player_score >= 5 && player_score <= 11)
+            {
+                spawnProbability = 5;
+            }
+            else if(player_score > 11)
+            {
+                spawnProbability = 2;
+            }
+            return spawnProbability;
         }
         public bool Intersected()
         {
@@ -76,7 +110,7 @@ namespace EscapeTheUnderground
 
             return doesIntersect;
         }
-        public void ChangePlayer(string imageName)
+        public void ChangePlayer(string imageName, Image Entity)
         {
             if(imageName != currentImage)
             {
@@ -88,117 +122,28 @@ namespace EscapeTheUnderground
                 image.EndInit();
 
                 // Set image
-                WpfAnimatedGif.ImageBehavior.SetAnimatedSource(Player, image);
+                WpfAnimatedGif.ImageBehavior.SetAnimatedSource(Entity, image);
                 currentImage = imageName;
-            }
-        }
-        public void Shoot(string direction)
-        {
-            Rectangle playerRect = new Rectangle();
-            playerRect.Height = 30;
-            playerRect.Width = 30;
-            playerRect.Fill = new SolidColorBrush(System.Windows.Media.Colors.AliceBlue);
-            Canvas.SetLeft(playerRect, Canvas.GetLeft(Player));
-            Canvas.SetTop(playerRect, Canvas.GetTop(Player));
-          
-        }
-        public void createEnemy()
-        {
-
-        }
-
-        public void GameControl()
-        {
-            health_bar.Value = player_health;
-            if(player_health <= 15)
-            {
-                health_bar.Foreground = Brushes.DarkRed;
-            }
-            else if(player_health >= 15 && player_health <= 30 )
-            {
-                health_bar.Foreground = Brushes.DarkOrange;
-            }
-            else
-            {
-                health_bar.Foreground = Brushes.DarkGreen;
-            }
-            foreach (Image tb in FindVisualChildren<Image>(LayoutRoot))
-            {
-                string tst = "";
-                Debug.WriteLine(tb.Tag);
-                if (tb.Tag != null) { tst = tb.Tag.ToString(); }
-                if(tst == "projectile")
-                {
-                    if (Canvas.GetLeft(tb) > 1000)
-                    {
-                        tb.Visibility = Visibility.Hidden;
-                    }
-                }
-            }
-        }
-        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-        {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-
-                {
-
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-
-                    if (child != null && child is T)
-
-                    {
-
-                        yield return (T)child;
-
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
             }
         }
         public void MovePlayer(object sender, EventArgs e)
         {
-            if(Intersected())
-            {
-                Debug.WriteLine("Intersected");
-            }
-            else
-            {
-                Debug.WriteLine("IntersectedNOT");
-            }
-            if (Keyboard.IsKeyDown(Key.A)) { ChangePlayer("walk_left"); left = true; direction = "left"; }
-            if(Keyboard.IsKeyDown(Key.D)) { ChangePlayer("walk_right"); right = true; direction = "right"; }
+            // Controls AI
+            GameControl();
+
+            if (Keyboard.IsKeyDown(Key.A)) { ChangePlayer("walk_left", Player); left = true; direction = "left"; }
+            if(Keyboard.IsKeyDown(Key.D)) { ChangePlayer("walk_right", Player); right = true; direction = "right"; }
             if (Keyboard.IsKeyDown(Key.E))
             {
-                ChangePlayer("fight_right");
+                ChangePlayer("fight_right", Player);
                 //changable = false;
-            }
-            // Shooting 
-            if(Keyboard.IsKeyDown(Key.W))
-            {
-                if(player_ammo > 0 && shootable == true)
-                {
-                    Shoot(direction);
-                    player_ammo -= 1;
-                    ammo_label.Content = player_ammo;
-                    shootable = false;
-                }
             }
             if (Keyboard.IsKeyUp(Key.A)) { left = false; }
             if(Keyboard.IsKeyUp(Key.D)) { right = false; }
             if (Keyboard.IsKeyUp(Key.E) && Keyboard.IsKeyUp(Key.D) && Keyboard.IsKeyUp(Key.A))
             {
-                ChangePlayer("still");
-                //changable = false;
+                ChangePlayer("still", Player);
             }
-            if(Keyboard.IsKeyUp(Key.W)) { shootable = true; }
-            //changable = true;
-            // Kolize
 
             double PlayerLeft = Canvas.GetLeft(Player);
             double PlayerRight = Canvas.GetRight(Player);
@@ -212,10 +157,6 @@ namespace EscapeTheUnderground
 
             int PlayerWidth = 36;
 
-            //test
-            //if(Intersected() && Cavas )
-
-            //test /
             if(PlayerLeft > ColsLeft - PlayerWidth*2.1 && PlayerLeft < ColsLeft + colBlock.Width && y >= Canvas.GetTop(colBlock) - colBlock.Height)
             {
                 right = false;
@@ -230,7 +171,6 @@ namespace EscapeTheUnderground
                 y = 393-colBlock.Height;
                 Canvas.SetTop(Player, y);
             }
-
             // Skok
             if (jump != true)
             {
@@ -267,5 +207,222 @@ namespace EscapeTheUnderground
             Xpos.Content = x;
             Ypos.Content = y;
         }
+
+        private void Player_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(Keyboard.IsKeyDown(Key.F))
+            {
+                MakeLaser(laser);
+                clearable = true;
+            }
+
+        }
+        private void MakeLaser(Image laser)
+        {
+            if(shootable == true)
+            {
+                laser.Source = src;
+                laser.Stretch = Stretch.Uniform;
+                laser.Width = 20;
+                laser.Height = 5;
+                laser.Tag = "projectile";
+
+                Canvas.SetLeft(laser, Canvas.GetLeft(Player) + (Player.Width / 2));
+                Canvas.SetTop(laser, Canvas.GetTop(Player) + 75);
+
+                LayoutRoot.Children.Add(laser);
+
+            }
+            
+        }
+        private void undergroundGame_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((Key)e.Key == Key.F && shootable == true && player_ammo > 0)
+            {
+                MakeLaser(laser);
+                fireLaser();
+                shootable = false;
+                player_ammo -= 1;
+                ammo_label.Content = "Náboje: " +  player_ammo;
+                // Add for later (!important)
+                // makeEnemy();
+            }
+        }
+        private void fireLaser()
+        {
+            laserTimer = new DispatcherTimer();
+            fixedDirection = direction;
+            laserTimer.Tick += new EventHandler(laserTimer_tick);
+            laserTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+            laserTimer.Start();
+        }
+        private void laserTimer_tick(object sender, EventArgs e)
+        {
+            if(fixedDirection == "left")
+            {
+                newPos = Canvas.GetLeft(laser) - 10;
+                Canvas.SetLeft(laser, newPos);
+            } 
+            else if(fixedDirection == "right")
+            {
+                newPos = newPos = Canvas.GetLeft(laser) + 10;
+                Canvas.SetLeft(laser, newPos);
+            }
+
+            if(newPos > Background.Width || newPos <= 0)
+            {
+                laserTimer.Stop();
+                LayoutRoot.Children.Remove(laser);
+                shootable = true;
+            }
+        }
+        private void makeEnemy(int left)
+        {
+            string pathToFiles = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+            BitmapImage enemy = new BitmapImage();
+            enemy.BeginInit();
+            enemy.UriSource = new Uri(pathToFiles + @"\Assets\Character\still.gif", UriKind.RelativeOrAbsolute);
+            enemy.CacheOption = BitmapCacheOption.OnLoad;
+            enemy.EndInit();
+
+            enemyAI = new Image();
+
+            enemyAI.Tag = "enemy";
+            enemyAI.Width = 135;
+            enemyAI.Height = 100;
+            enemyAI.Stretch = Stretch.Uniform;
+            //Canvas.SetLeft(enemyAI, Canvas.GetLeft(Player) + left + (Player.Width / 2));
+            Canvas.SetTop(enemyAI, Canvas.GetTop(Player) + 75);
+
+            Canvas.SetLeft(enemyAI, left);
+            enemyAI.Source = enemy;
+            LayoutRoot.Children.Add(enemyAI);
+            enemyCount += 1;
+        }
+        public void GameControl()
+        {
+            health_bar.Value = player_health;
+            if (player_health <= 15 && player_health >= 0)
+            {
+                health_bar.Foreground = Brushes.DarkRed;
+            }
+            else if (player_health >= 15 && player_health <= 30)
+            {
+                health_bar.Foreground = Brushes.DarkOrange;
+            }
+            else if(player_health <= 0)
+            {
+                Paused.Visibility = Visibility.Visible;
+                InfoLabel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                health_bar.Foreground = Brushes.DarkGreen;
+            }
+            foreach (Image tb in FindVisualChildren<Image>(LayoutRoot))
+            {
+                string tst = "";
+                if (tb.Tag != null) { tst = tb.Tag.ToString(); }
+                if (tst == "enemy")
+                {
+                    Canvas.SetTop(tb, 385);
+                    if (Canvas.GetLeft(tb) > Canvas.GetLeft(Player) - 60)
+                    {
+                        Canvas.SetLeft(tb, Canvas.GetLeft(tb) - 2);
+                        // Walk enemy to right
+                        // Rotate enemy to right
+                    }
+                   if(Canvas.GetLeft(tb) < Canvas.GetLeft(Player) + 60)
+                   {
+                        Canvas.SetLeft(tb, Canvas.GetLeft(tb) + 2);
+                        // Walk enemy to left
+                        // Rotate enemy to left
+                   }
+                    Rect tbRect = new Rect();
+                    tbRect.Location = tb.PointToScreen(new Point(0D, 0D));
+                    tbRect.Size = new Size(tb.Width, tb.Height);
+
+                    Rect PlayerRect = new Rect();
+                    PlayerRect.Location = Player.PointToScreen(new Point(0D, 0D));
+                    PlayerRect.Size = new Size(Player.Width, Player.Height);
+
+                    if(PlayerRect.IntersectsWith(tbRect)) {
+                        player_health -= 0.1;
+                    }
+                }
+                foreach (Image sh in FindVisualChildren<Image>(LayoutRoot))
+                {
+                    string sh_tst = "";
+                    if (sh.Tag != null) { sh_tst = sh.Tag.ToString(); }
+                    if (sh_tst == "projectile" && tst == "enemy")
+                    {
+                        Rect shRect = new Rect();
+                        shRect.Location = sh.PointToScreen(new Point(0D, 0D));
+                        shRect.Size = new Size(sh.Width, sh.Height);
+
+                        Rect tbRect = new Rect();
+                        tbRect.Location = tb.PointToScreen(new Point(0D, 0D));
+                        tbRect.Size = new Size(tb.Width, tb.Height);
+
+                        if (shRect.IntersectsWith(tbRect))
+                        {
+                            LayoutRoot.Children.Remove(tb);
+                            LayoutRoot.Children.Remove(sh);
+                            enemyCount -= 1;
+                            player_score += 1;
+                            score_label.Content = "Skóre: " + player_score;
+                        }
+                    }
+                }
+            }
+        }
+        private void enemyCycle(object sender, EventArgs e)
+        {
+            Random rnd = new Random();
+            int side = rnd.Next(1, 3);
+            int spawnProbability = difficultyLevel();
+            Debug.WriteLine(spawnProbability + "xxxxxxxxxxxxxx");
+            int spawn = rnd.Next(1, spawnProbability);
+            int hittableInt = rnd.Next(1, 3);
+            if(hittableInt == 1) { hittable = true; } else { hittable = false; }
+            if (enemyCount < 1 & spawn == 1)
+            {
+                if(side == 1)
+                {
+                    makeEnemy(-100);
+                    makeEnemy(1300);
+                }
+                else if(side == 2)
+                {
+                    makeEnemy(1300);
+                }
+            }
+        }
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+
+                {
+
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+
+                    if (child != null && child is T)
+
+                    {
+
+                        yield return (T)child;
+
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
+        }
+
     }
 }
