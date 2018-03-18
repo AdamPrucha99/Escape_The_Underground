@@ -17,8 +17,9 @@
         <Label x:Name="HP" Content="HP: " Canvas.Left="234" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
         <ProgressBar x:Name="health_bar" Height="25" Canvas.Left="295" Canvas.Top="11" Width="133"/>
         <Image x:Name="BULLLLLLLLLLLLLLLLLLLET"></Image>
-        <Rectangle Panel.ZIndex="998" x:Name="Paused" Fill="#FFE00D0D" Height="569" Stroke="Black" Width="1272" Visibility="Hidden"/>
-        <Label Panel.ZIndex="999" x:Name="InfoLabel" Content="You died" Canvas.Left="592" Canvas.Top="276" Visibility="Hidden"/>
+        <Image Panel.ZIndex="998" x:Name="Paused" Height="569"  Width="1272" Visibility="Hidden"/>
+        <Label Panel.ZIndex="999" x:Name="InfoLabelTitle" Content="You died" Canvas.Left="592" Canvas.Top="276" Visibility="Hidden" FontFamily="Roboto Slab" FontWeight="Bold"/>
+        <Button Panel.ZIndex="999" x:Name="ControlButton" Content="Hrát znovu" Canvas.Left="592" Canvas.Top="356" Width="75" Click="ControlButton_Click" Visibility="Hidden"/>
 
     </Canvas>
 </Window>

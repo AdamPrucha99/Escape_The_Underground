@@ -35,15 +35,16 @@ namespace EscapeTheUnderground
         int MomentumUnit = 23;
         int Momentum;
         string currentImage;
+        string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
         double player_health = 100;
         string direction = "right";
         string fixedDirection;
         int player_ammo = 50;
         int player_score = 0;
-        int enemyCount;
         bool shootable = true;
         bool hittable = true;
         bool clearable = false;
+        bool removable = false;
         double x = 0;
         double y = 0;
         public MainWindow()
@@ -78,6 +79,25 @@ namespace EscapeTheUnderground
             Enemytimer.Tick += new EventHandler(enemyCycle);
             Enemytimer.Interval = new TimeSpan(0,0,1);
             Enemytimer.Start();
+        }
+        private void pauseGame()
+        {
+            BitmapImage srcL = new BitmapImage();
+            srcL.BeginInit();
+            srcL.UriSource = new Uri(filePath + @"\Assets\Misc\paused_screen.png", UriKind.RelativeOrAbsolute);
+            srcL.CacheOption = BitmapCacheOption.OnLoad;
+            srcL.EndInit();
+
+            Paused.Source = srcL;
+
+            
+
+            Paused.Visibility = Visibility.Visible;
+            InfoLabelTitle.Visibility = Visibility.Visible;
+            InfoLabelTitle.FontSize = 24;
+            InfoLabelTitle.Foreground = Brushes.White;
+            ControlButton.Visibility = Visibility.Visible;
+
         }
         private int difficultyLevel()
         {
@@ -297,7 +317,6 @@ namespace EscapeTheUnderground
             Canvas.SetLeft(enemyAI, left);
             enemyAI.Source = enemy;
             LayoutRoot.Children.Add(enemyAI);
-            enemyCount += 1;
         }
         public void GameControl()
         {
@@ -312,8 +331,7 @@ namespace EscapeTheUnderground
             }
             else if(player_health <= 0)
             {
-                Paused.Visibility = Visibility.Visible;
-                InfoLabel.Visibility = Visibility.Visible;
+                pauseGame();
             }
             else
             {
@@ -325,29 +343,35 @@ namespace EscapeTheUnderground
                 if (tb.Tag != null) { tst = tb.Tag.ToString(); }
                 if (tst == "enemy")
                 {
-                    Canvas.SetTop(tb, 385);
-                    if (Canvas.GetLeft(tb) > Canvas.GetLeft(Player) - 60)
-                    {
-                        Canvas.SetLeft(tb, Canvas.GetLeft(tb) - 2);
-                        // Walk enemy to right
-                        // Rotate enemy to right
+                    if(removable) {
+                        LayoutRoot.Children.Remove(tb);
                     }
-                   if(Canvas.GetLeft(tb) < Canvas.GetLeft(Player) + 60)
-                   {
-                        Canvas.SetLeft(tb, Canvas.GetLeft(tb) + 2);
-                        // Walk enemy to left
-                        // Rotate enemy to left
-                   }
-                    Rect tbRect = new Rect();
-                    tbRect.Location = tb.PointToScreen(new Point(0D, 0D));
-                    tbRect.Size = new Size(tb.Width, tb.Height);
+                    else
+                    {
+                        Canvas.SetTop(tb, 385);
+                        if (Canvas.GetLeft(tb) > Canvas.GetLeft(Player) - 60)
+                        {
+                            Canvas.SetLeft(tb, Canvas.GetLeft(tb) - 2);
+                            // Walk enemy to right
+                            // Rotate enemy to right
+                        }
+                       if(Canvas.GetLeft(tb) < Canvas.GetLeft(Player) + 60)
+                       {
+                            Canvas.SetLeft(tb, Canvas.GetLeft(tb) + 2);
+                            // Walk enemy to left
+                            // Rotate enemy to left
+                       }
+                        Rect tbRect = new Rect();
+                        tbRect.Location = tb.PointToScreen(new Point(0D, 0D));
+                        tbRect.Size = new Size(tb.Width, tb.Height);
 
-                    Rect PlayerRect = new Rect();
-                    PlayerRect.Location = Player.PointToScreen(new Point(0D, 0D));
-                    PlayerRect.Size = new Size(Player.Width, Player.Height);
+                        Rect PlayerRect = new Rect();
+                        PlayerRect.Location = Player.PointToScreen(new Point(0D, 0D));
+                        PlayerRect.Size = new Size(Player.Width, Player.Height);
 
-                    if(PlayerRect.IntersectsWith(tbRect)) {
-                        player_health -= 0.1;
+                        if(PlayerRect.IntersectsWith(tbRect)) {
+                            player_health -= 0.1;
+                        }
                     }
                 }
                 foreach (Image sh in FindVisualChildren<Image>(LayoutRoot))
@@ -368,13 +392,14 @@ namespace EscapeTheUnderground
                         {
                             LayoutRoot.Children.Remove(tb);
                             LayoutRoot.Children.Remove(sh);
-                            enemyCount -= 1;
                             player_score += 1;
                             score_label.Content = "Skóre: " + player_score;
                         }
                     }
                 }
             }
+            // Ensure no further removal is made
+            removable = false;
         }
         private void enemyCycle(object sender, EventArgs e)
         {
@@ -385,7 +410,7 @@ namespace EscapeTheUnderground
             int spawn = rnd.Next(1, spawnProbability);
             int hittableInt = rnd.Next(1, 3);
             if(hittableInt == 1) { hittable = true; } else { hittable = false; }
-            if (enemyCount < 1 & spawn == 1)
+            if (spawn == 1)
             {
                 if(side == 1)
                 {
@@ -403,17 +428,13 @@ namespace EscapeTheUnderground
             if (depObj != null)
             {
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-
                 {
-
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
 
                     if (child != null && child is T)
 
                     {
-
                         yield return (T)child;
-
                     }
 
                     foreach (T childOfChild in FindVisualChildren<T>(child))
@@ -423,6 +444,16 @@ namespace EscapeTheUnderground
                 }
             }
         }
-
+        private void ControlButton_Click(object sender, RoutedEventArgs e)
+        {
+            player_score = 0;
+            score_label.Content = player_score;
+            player_health = 100;
+            health_bar.Value = player_health;
+            ControlButton.Visibility = Visibility.Hidden;
+            Paused.Visibility = Visibility.Hidden;
+            InfoLabelTitle.Visibility = Visibility.Hidden;
+            removable = true;
+        }
     }
 }
