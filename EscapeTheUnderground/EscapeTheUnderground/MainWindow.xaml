@@ -8,18 +8,20 @@
         Title="MainWindow" Height="600" Width="1280" KeyDown="undergroundGame_KeyDown">
     <Canvas x:Name="LayoutRoot">
         <Image x:Name="Background" Panel.ZIndex="-2" Height="{Binding Path=ActualHeight, ElementName=LayoutRoot}" Stretch="Uniform" Width="{Binding Path=ActualWidth, ElementName=LayoutRoot}"/>
-        <Image x:Name="Player" Height="100" Width="135" Canvas.Left="79" Canvas.Top="202" KeyDown="Player_KeyDown"></Image>
-        <Label x:Name="Ypos" Content="Label" Canvas.Left="1097" Canvas.Top="10"/>
-        <Label x:Name="Xpos" Content="Label" Canvas.Left="1192" Canvas.Top="17"/>
+        <Image Tag="Player" x:Name="Player" Height="100" Width="135" Canvas.Left="79" Canvas.Top="202" KeyDown="Player_KeyDown"></Image>
         <Rectangle x:Name="colBlock" Fill="#FFE00D0D" Height="100" Canvas.Left="-578" Stroke="Black" Canvas.Top="227" Width="441"/>
         <Label x:Name="score_label" Content="Skóre: 0" Canvas.Left="10" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
-        <Label x:Name="ammo_label" Content="Náboje: 20" Canvas.Left="115" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
+        <Label x:Name="ammo_label" Content="Náboje: 5" Canvas.Left="115" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
         <Label x:Name="HP" Content="HP: " Canvas.Left="234" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
-        <ProgressBar x:Name="health_bar" Height="25" Canvas.Left="295" Canvas.Top="11" Width="133"/>
+        <ProgressBar x:Name="health_bar" Height="25" Canvas.Left="335" Canvas.Top="11" Width="133"/>
         <Image x:Name="BULLLLLLLLLLLLLLLLLLLET"></Image>
         <Image Panel.ZIndex="998" x:Name="Paused" Height="569"  Width="1272" Visibility="Hidden"/>
-        <Label Panel.ZIndex="999" x:Name="InfoLabelTitle" Content="You died" Canvas.Left="592" Canvas.Top="276" Visibility="Hidden" FontFamily="Roboto Slab" FontWeight="Bold"/>
-        <Button Panel.ZIndex="999" x:Name="ControlButton" Content="Hrát znovu" Canvas.Left="592" Canvas.Top="356" Width="75" Click="ControlButton_Click" Visibility="Hidden"/>
+        <Label Panel.ZIndex="999" x:Name="InfoLabelTitle" Content="You died" Canvas.Left="512" Canvas.Top="276" Visibility="Hidden" FontFamily="Roboto Slab" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Panel.ZIndex="999" x:Name="ControlButton" Content="Hrát znovu" Canvas.Left="592" Canvas.Top="356" Width="75" Click="ControlButton_Click" Visibility="Hidden" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label x:Name="level_label" Content="Level: 1" Canvas.Left="1149" Canvas.Top="6" FontSize="20" FontWeight="Bold" Foreground="White"/>
+        <Button Panel.ZIndex="999" x:Name ="startButton" Content="Začít hru" Canvas.Left="573" Canvas.Top="276" Width="110" Click="Button_Click" Height="28"/>
+        <Label Panel.ZIndex="999" x:Name="InfoLabelTitle2" Content="Vítej ve hře!" Canvas.Left="526" Canvas.Top="163" Visibility="Visible" FontFamily="Roboto Slab" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="36" FontWeight="Bold" Foreground="White"/>
+        <Label Panel.ZIndex="999" x:Name="InfoLabelTitle3" Content="F = střelba / AD = pohyb" Canvas.Left="535" Canvas.Top="227" Visibility="Visible" FontFamily="Roboto Slab" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="White"/>
 
     </Canvas>
 </Window>
